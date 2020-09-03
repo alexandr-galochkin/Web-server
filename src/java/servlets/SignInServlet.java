@@ -1,8 +1,11 @@
 package servlets;
 
 import base.AccountService;
-import accountService.UserProfile;
-import dbService.DBException;
+import base.AdressService;
+import frontend.Frontend;
+import messageSystem.messages.StatusOfAuthentication;
+import services.accountService.UserProfile;
+import services.dbService.exceptions.DBException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -10,11 +13,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class SignInServlet extends HttpServlet {
-    private final AccountService accountService;
+import static messageSystem.messages.StatusOfAuthentication.*;
 
-    public SignInServlet(AccountService accountService) {
-        this.accountService = accountService;
+public class SignInServlet extends HttpServlet {
+    private final AdressService adressService;
+    private final Frontend frontend;
+
+    public SignInServlet(AdressService adressService, Frontend frontend) {
+        this.adressService = adressService;
+        this.frontend = frontend;
     }
 
     //sign in
@@ -22,27 +29,27 @@ public class SignInServlet extends HttpServlet {
                        HttpServletResponse response) throws ServletException, IOException {
         String login = request.getParameter("login");
         String password = request.getParameter("password");
-
+        String sessionId = request.getRequestedSessionId();
         if (login == null || password == null) {
             response.setContentType("text/html;charset=utf-8");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        try {
-            UserProfile profile = accountService.getUserByLogin(login);
-            if (profile == null || !profile.getPassword().equals(password)) {
-                response.setContentType("text/html;charset=utf-8");
-                response.getWriter().println("Unauthorized");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
+        StatusOfAuthentication status = frontend.isAuthenticated(login, password, sessionId);
+        if (status == WrongPassword) {
             response.setContentType("text/html;charset=utf-8");
-            response.getWriter().println("Authorized: " + login);
-            response.setStatus(HttpServletResponse.SC_OK);
-        } catch (DBException e){
-            response.setContentType("text/html;charset=utf-8");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println("Wrong password");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
-        };
+        }
+        if (status == UserIsNotRegistered) {
+            response.setContentType("text/html;charset=utf-8");
+            response.getWriter().println("User is not registered");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+        response.setContentType("text/html;charset=utf-8");
+        response.getWriter().println("Authorized: " + login);
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

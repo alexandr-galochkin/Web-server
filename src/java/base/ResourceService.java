@@ -1,5 +1,7 @@
 package base;
 
+import services.accountService.UserProfile;
+
 import java.io.RandomAccessFile;
 import java.nio.file.Path;
 
@@ -12,4 +14,5 @@ public interface ResourceService {
     public String readString(RandomAccessFile file);
 
     public Object createObjectFromFile(String stringPath);
+
 }

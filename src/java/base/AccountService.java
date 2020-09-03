@@ -1,9 +1,10 @@
 package base;
 
-import accountService.UserProfile;
-import dbService.DBException;
+import messageSystem.Abonent;
+import services.accountService.UserProfile;
+import services.dbService.exceptions.DBException;
 
-public interface AccountService {
+public interface AccountService extends Abonent, Runnable {
     UserProfile getUserByLogin(String login) throws DBException;
 
     boolean contains(String login) throws DBException;

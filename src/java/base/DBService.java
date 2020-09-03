@@ -1,22 +1,18 @@
 package base;
 
-import accountService.Message;
-import accountService.UserProfile;
-import dbService.DBException;
-import dbService.dataSets.MessagesDataSet;
-import dbService.dataSets.UsersDataSet;
+import messageSystem.Abonent;
+import messageSystem.messages.StatusOfAuthentication;
+import services.accountService.UserProfile;
+import services.dbService.exceptions.DBException;
 
-import java.util.Date;
 import java.util.List;
 
-public interface DBService {
+public interface DBService extends Abonent, Runnable {
     void printConnectInfo();
 
     UserProfile getUser(long id) throws DBException;
 
     List<UserProfile> allUsers();
-
-    public List<MessagesDataSet> allMessages();
 
     long addUser(UserProfile userProfile) throws DBException;
 
@@ -26,5 +22,8 @@ public interface DBService {
 
     boolean contains(String login);
 
-    public long addMessage(Message message) throws DBException;
+    StatusOfAuthentication authentication(String login, String password);
+
+    MessageSystem getMessageSystem();
+
 }
